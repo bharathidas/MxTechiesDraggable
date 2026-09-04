@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="com.mxtechies.widget.web.mxtechiesdraggable.MxTechiesDraggable" pluginWidget="true" offlineCapable="true" supportedPlatform="Web" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>MxTechies Draggable</name>
+    <description>Makes the content placed inside it draggable with mouse or touch. Supports axis locking, a drag handle, bounds, grid snapping, saving the position to attributes and drag events.</description>
+    <studioProCategory>Containers</studioProCategory>
+    <studioCategory>Containers</studioCategory>
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Content">
+                <property key="content" type="widgets" required="false">
+                    <caption>Content</caption>
+                    <description>The widgets that are moved when the user drags.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Dragging">
+                <property key="axis" type="enumeration" defaultValue="both">
+                    <caption>Axis</caption>
+                    <description>Which direction the content can be moved in. 'None' still fires the events but does not move the content.</description>
+                    <enumerationValues>
+                        <enumerationValue key="both">Both</enumerationValue>
+                        <enumerationValue key="x">Horizontal only</enumerationValue>
+                        <enumerationValue key="y">Vertical only</enumerationValue>
+                        <enumerationValue key="none">None</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="handle" type="string" required="false">
+                    <caption>Handle selector</caption>
+                    <description>CSS selector of the element inside the content that starts a drag, e.g. '.drag-handle'. Leave empty to drag from anywhere.</description>
+                </property>
+                <property key="cancel" type="string" required="false">
+                    <caption>Cancel selector</caption>
+                    <description>CSS selector of elements inside the content that must NOT start a drag, e.g. 'input, button'.</description>
+                </property>
+                <property key="disabled" type="expression" required="false" defaultValue="false">
+                    <caption>Disabled</caption>
+                    <description>When true the content cannot be dragged.</description>
+                    <returnType type="Boolean" />
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Bounds">
+                <property key="bounds" type="enumeration" defaultValue="none">
+                    <caption>Bounds</caption>
+                    <description>Restricts how far the content can be moved.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="parent">Parent element</enumerationValue>
+                        <enumerationValue key="body">Page body</enumerationValue>
+                        <enumerationValue key="selector">Custom selector</enumerationValue>
+                        <enumerationValue key="offset">Distance from start</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="boundsSelector" type="string" required="false">
+                    <caption>Bounds selector</caption>
+                    <description>CSS selector of the element the content must stay inside, e.g. '#canvas'.</description>
+                </property>
+                <property key="boundsLeft" type="integer" defaultValue="100">
+                    <caption>Max left (px)</caption>
+                    <description>How far the content may move to the left of its start position.</description>
+                </property>
+                <property key="boundsTop" type="integer" defaultValue="100">
+                    <caption>Max up (px)</caption>
+                    <description>How far the content may move up from its start position.</description>
+                </property>
+                <property key="boundsRight" type="integer" defaultValue="100">
+                    <caption>Max right (px)</caption>
+                    <description>How far the content may move to the right of its start position.</description>
+                </property>
+                <property key="boundsBottom" type="integer" defaultValue="100">
+                    <caption>Max down (px)</caption>
+                    <description>How far the content may move down from its start position.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Grid snapping">
+                <property key="gridX" type="integer" defaultValue="0">
+                    <caption>Grid width (px)</caption>
+                    <description>Horizontal step the content snaps to while dragging. 0 disables snapping.</description>
+                </property>
+                <property key="gridY" type="integer" defaultValue="0">
+                    <caption>Grid height (px)</caption>
+                    <description>Vertical step the content snaps to while dragging. 0 disables snapping.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Position">
+            <propertyGroup caption="Position">
+                <property key="xAttribute" type="attribute" required="false">
+                    <caption>X attribute</caption>
+                    <description>Attribute that holds the horizontal offset in pixels. Written when a drag ends; changing it from a microflow or nanoflow moves the content.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="yAttribute" type="attribute" required="false">
+                    <caption>Y attribute</caption>
+                    <description>Attribute that holds the vertical offset in pixels. Written when a drag ends; changing it from a microflow or nanoflow moves the content.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="defaultX" type="integer" defaultValue="0">
+                    <caption>Default X (px)</caption>
+                    <description>Starting horizontal offset, used when no X attribute is set or the attribute is empty.</description>
+                </property>
+                <property key="defaultY" type="integer" defaultValue="0">
+                    <caption>Default Y (px)</caption>
+                    <description>Starting vertical offset, used when no Y attribute is set or the attribute is empty.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Appearance">
+            <propertyGroup caption="Appearance">
+                <property key="display" type="enumeration" defaultValue="inline">
+                    <caption>Width</caption>
+                    <description>'Fit content' lets the element hug its content so it can move sideways inside its parent. 'Full width' stretches it like a normal container.</description>
+                    <enumerationValues>
+                        <enumerationValue key="inline">Fit content</enumerationValue>
+                        <enumerationValue key="block">Full width</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="showPosition" type="boolean" defaultValue="false">
+                    <caption>Show position badge</caption>
+                    <description>Shows a small badge with the current X and Y offset while the content is being dragged.</description>
+                </property>
+                <property key="liftWhileDragging" type="boolean" defaultValue="true">
+                    <caption>Lift while dragging</caption>
+                    <description>Raises the content with a shadow and slight scale while it is being dragged, and eases it back on drop.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Events">
+            <propertyGroup caption="Events">
+                <property key="onDragStart" type="action" required="false">
+                    <caption>On drag start</caption>
+                    <description>Runs when the user starts dragging.</description>
+                </property>
+                <property key="onDragStop" type="action" required="false">
+                    <caption>On drag stop</caption>
+                    <description>Runs after the user releases the content. The X and Y attributes are already updated when this runs.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+    </properties>
+</widget>

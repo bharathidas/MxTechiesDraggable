@@ -1,0 +1,71 @@
+{
+    "name": "mxtechiesdraggable-web",
+    "widgetName": "MxTechiesDraggable",
+    "version": "1.0.0",
+    "description": "Makes any Mendix content draggable with the mouse or touch, powered by react-draggable. Supports axis locking, drag handles, bounds, grid snapping, position persistence and drag events.",
+    "copyright": "© MX Techies 2026",
+    "license": "Apache-2.0",
+    "private": true,
+    "mxpackage": {
+        "name": "MxTechiesDraggable",
+        "type": "widget",
+        "mpkName": "com.mxtechies.widget.web.MxTechiesDraggable.mpk"
+    },
+    "packagePath": "com.mxtechies.widget.web",
+    "marketplace": {
+        "minimumMXVersion": "11.0.0",
+        "appName": "MxTechies Draggable"
+    },
+    "config": {
+        "projectPath": "../../",
+        "mendixHost": "http://localhost:8080",
+        "developmentPort": 3000
+    },
+    "engines": {
+        "node": "^22.18.0"
+    },
+    "scripts": {
+        "build": "pluggable-widgets-tools build:ts",
+        "dev": "pluggable-widgets-tools start:ts",
+        "lint": "pluggable-widgets-tools lint",
+        "lint:fix": "pluggable-widgets-tools lint:fix",
+        "release": "pluggable-widgets-tools release:ts"
+    },
+    "dependencies": {
+        "classnames": "^2.5.1",
+        "react-draggable": "^4.7.1"
+    },
+    "devDependencies": {
+        "@mendix/pluggable-widgets-tools": "11.12.1",
+        "@types/big.js": "^6.2.2"
+    },
+    "overrides": {
+        "zip-a-folder": "6.1.4",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "@types/react": "19.0.0",
+        "@types/react-dom": "19.0.0"
+    },
+    "resolutions": {
+        "zip-a-folder": "6.1.4",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "@types/react": "19.0.0",
+        "@types/react-dom": "19.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bharathidas/MxTechiesDraggable.git"
+    },
+    "homepage": "https://github.com/bharathidas/MxTechiesDraggable",
+    "bugs": {
+        "url": "https://github.com/bharathidas/MxTechiesDraggable/issues"
+    },
+    "keywords": [
+        "mendix",
+        "pluggable-widget",
+        "draggable",
+        "react-draggable",
+        "drag-and-drop"
+    ]
+}
