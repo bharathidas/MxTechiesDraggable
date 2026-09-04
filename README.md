@@ -1,5 +1,7 @@
 # MxTechies Draggable
 
+> Make any Mendix content draggable, with axis lock, handles, bounds, grid snapping and saved positions.
+
 A Mendix pluggable widget that makes any content draggable with the mouse or touch.
 It is a thin wrapper around [react-draggable](https://react-grid-layout.github.io/react-draggable/).
 
