@@ -1,6 +1,6 @@
 # MxTechies Draggable
 
-> Make any Mendix content draggable, with axis lock, handles, bounds, grid snapping and saved positions.
+> MxTechies Draggable turns any Mendix container into draggable content. Place cards, notes, images, panels or small forms inside it and let users move them with the mouse or touch. Lock movement to one axis, start drags from a handle, keep inputs and buttons clickable with a cancel selector, and confine movement to the parent, the page, a custom element, or a fixed distance. Snap to a grid, store the final X and Y in attributes, move content from microflows, and react with drag start and drag stop events.
 
 A Mendix pluggable widget that makes any content draggable with the mouse or touch.
 It is a thin wrapper around [react-draggable](https://react-grid-layout.github.io/react-draggable/).
