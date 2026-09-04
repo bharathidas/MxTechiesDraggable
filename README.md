@@ -12,7 +12,7 @@ It is a thin wrapper around [react-draggable](https://react-grid-layout.github.i
 - License: Apache-2.0
 
 An example module that ports every box from the react-draggable demo page is published separately:
-[DraggableDemo](https://github.com/bharathidas/DraggableDemo).
+[DraggableDemo](https://github.com/bharathidas/MxTechiesDraggableDemo).
 
 ## Installation
 
