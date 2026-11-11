@@ -76,3 +76,736 @@
         transform: translate(40%, -55%);
     }
 }
+
+/* ---- 2.0: keyboard, motion, snap guides and drop zones ------------------------------------ */
+
+.mxt-draggable--keyboard:focus {
+    outline: none;
+}
+
+.mxt-draggable--keyboard:focus-visible {
+    outline: 2px solid var(--mxt-draggable-focus, #2563eb);
+    outline-offset: 3px;
+}
+
+/* Picked up with the keyboard: looks the same as a pointer drag. */
+.mxt-draggable--grabbed {
+    z-index: 1000;
+}
+
+.mxt-draggable--lift.mxt-draggable--grabbed {
+    filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.3));
+}
+
+/* Animate: tilt and snap offsets use the standalone `rotate` and `translate` properties, which
+   compose with react-draggable's `transform` instead of replacing it. */
+.mxt-draggable--animated {
+    /* No translate here: the snap offset is folded into the position on release and must vanish instantly. */
+    transition: filter 180ms ease, rotate 220ms ease-out, scale 150ms ease-out;
+}
+
+/* While dragging only the small extras ease; the transform follows the pointer 1:1. */
+.mxt-draggable--animated.mxt-draggable--active {
+    transition: filter 180ms ease, rotate 140ms ease-out, translate 90ms ease-out, scale 150ms ease-out;
+}
+
+/* Grid steps glide on a stiff spring instead of jumping. */
+.mxt-draggable--animated.mxt-draggable--glide {
+    transition: filter 180ms ease, rotate 140ms ease-out, translate 90ms ease-out, scale 150ms ease-out,
+        transform var(--mxt-draggable-glide-duration, 160ms)
+            var(--mxt-draggable-glide-ease, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Return, throw and keyboard moves: the widget sets the duration and a spring or decay curve. */
+.mxt-draggable--settling {
+    transition: filter 180ms ease, rotate 220ms ease-out,
+        transform var(--mxt-draggable-settle-duration, 320ms)
+            var(--mxt-draggable-settle-ease, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Hovering a drop zone: a small "ready to drop" squeeze. */
+.mxt-draggable--animated.mxt-draggable--over-zone {
+    scale: 0.97;
+}
+
+/* Visually hidden text for screen readers (instructions and live announcements). */
+.mxt-draggable__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Drop zones (elements matched by the drop zone selector). Themes can override these. */
+.mxt-drop-zone--armed {
+    outline: 2px dashed var(--mxt-drop-zone-armed, rgba(37, 99, 235, 0.35));
+    outline-offset: -2px;
+    transition: outline-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.mxt-drop-zone--over {
+    outline-color: var(--mxt-drop-zone-over, #2563eb);
+    background-color: var(--mxt-drop-zone-over-bg, rgba(37, 99, 235, 0.08));
+    box-shadow: inset 0 0 0 1px var(--mxt-drop-zone-over, #2563eb);
+}
+
+.mxt-drop-zone--dropped {
+    animation: mxt-drop-zone-flash 650ms ease-out;
+}
+
+@keyframes mxt-drop-zone-flash {
+    from {
+        box-shadow: inset 0 0 0 3px var(--mxt-drop-zone-over, #2563eb);
+    }
+    to {
+        box-shadow: inset 0 0 0 0 transparent;
+    }
+}
+
+/* Ripple at the drop point, appended to <body>. */
+.mxt-drop-ripple {
+    position: fixed;
+    z-index: 2147483000;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    border: 2px solid var(--mxt-drop-zone-over, #2563eb);
+    pointer-events: none;
+    animation: mxt-drop-ripple 600ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes mxt-drop-ripple {
+    from {
+        opacity: 0.9;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 0;
+        transform: scale(5);
+    }
+}
+
+/* Snap guides, rendered in a layer on <body> in viewport coordinates. */
+.mxt-snap-guides {
+    position: fixed;
+    inset: 0;
+    z-index: 2147482000;
+    pointer-events: none;
+}
+
+.mxt-snap-guide {
+    position: fixed;
+    background: var(--mxt-snap-guide, #ec4899);
+    animation: mxt-snap-guide-in 120ms ease-out;
+}
+
+.mxt-snap-guide--vertical {
+    width: 1px;
+    margin-left: -0.5px;
+}
+
+.mxt-snap-guide--horizontal {
+    height: 1px;
+    margin-top: -0.5px;
+}
+
+@keyframes mxt-snap-guide-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Honour the operating system's reduced motion setting. */
+@media (prefers-reduced-motion: reduce) {
+    .mxt-draggable--lift,
+    .mxt-draggable--animated,
+    .mxt-draggable--animated.mxt-draggable--active,
+    .mxt-draggable--animated.mxt-draggable--glide,
+    .mxt-draggable--settling,
+    .mxt-drop-zone--armed {
+        transition: none;
+    }
+
+    .mxt-draggable--animated.mxt-draggable--over-zone {
+        scale: none;
+    }
+
+    .mxt-drop-ripple,
+    .mxt-drop-zone--dropped,
+    .mxt-snap-guide,
+    .mxt-draggable__badge {
+        animation: none;
+    }
+}
+
+/* ---- 2.1: resizing, accept rules, motion levels ------------------------------------------- */
+
+.mxt-draggable--sized {
+    overflow: auto;
+}
+
+.mxt-draggable__resize {
+    position: absolute;
+    z-index: 2;
+    touch-action: none;
+}
+
+.mxt-draggable__resize--e {
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.mxt-draggable__resize--s {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.mxt-draggable__resize--se {
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+}
+
+/* The corner grip: two short diagonal lines, shown on hover, focus and while resizing. */
+.mxt-draggable__resize--se::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--mxt-draggable-grip, rgba(17, 24, 39, 0.45));
+    border-bottom: 2px solid var(--mxt-draggable-grip, rgba(17, 24, 39, 0.45));
+    border-bottom-right-radius: 2px;
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.mxt-draggable--resizable:hover > .mxt-draggable__resize--se::after,
+.mxt-draggable--resizable:focus-visible > .mxt-draggable__resize--se::after,
+.mxt-draggable--resizing > .mxt-draggable__resize--se::after {
+    opacity: 1;
+}
+
+.mxt-draggable--resizing {
+    user-select: none;
+    outline: 1px dashed var(--mxt-drop-zone-over, #2563eb);
+    outline-offset: 2px;
+}
+
+.mxt-draggable__badge--size {
+    top: auto;
+    bottom: 0;
+    transform: translate(40%, 55%);
+    animation: none;
+}
+
+/* Zones that do not accept the dragged item's type. */
+.mxt-drop-zone--rejected {
+    outline: 2px dashed var(--mxt-drop-zone-rejected, rgba(185, 28, 28, 0.35));
+    outline-offset: -2px;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transition: opacity 150ms ease;
+}
+
+/* Motion = Subtle: no squeeze on zones, shorter springs. */
+.mxt-draggable--motion-subtle.mxt-draggable--over-zone {
+    scale: none;
+}
+
+@media print {
+    .mxt-draggable__resize,
+    .mxt-draggable__badge {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mxt-drop-zone--rejected,
+    .mxt-draggable__resize--se::after {
+        transition: none;
+    }
+}
+
+/* ---- 2.2: selection, lasso, sorting, rotation, z-order, previews, menu, notices ------------ */
+
+.mxt-draggable {
+    --mxt-accent: var(--mxt-draggable-accent, #2563eb);
+    --mxt-danger: var(--mxt-draggable-danger, #b91c1c);
+    --mxt-surface: var(--mxt-draggable-surface, #ffffff);
+    --mxt-text: var(--mxt-draggable-text, #111827);
+}
+
+/* Selected items: a ring that does not change the layout. */
+.mxt-draggable--selected {
+    outline: 2px solid var(--mxt-accent);
+    outline-offset: 2px;
+}
+
+.mxt-draggable--selected.mxt-draggable--keyboard:focus-visible {
+    outline-width: 3px;
+}
+
+.mxt-draggable--following {
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22));
+    z-index: 999;
+}
+
+/* Lasso area and rubber band (the band lives on <body>). */
+.mxt-lasso-area {
+    user-select: none;
+}
+
+.mxt-lasso {
+    position: fixed;
+    z-index: 2147482500;
+    border: 1px solid var(--mxt-draggable-accent, #2563eb);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* Sortable lists: displaced items glide to their new slots. */
+.mxt-draggable--animated.mxt-draggable--displaced {
+    transition: filter 180ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mxt-draggable--motion-subtle.mxt-draggable--displaced {
+    transition: transform 160ms ease-out;
+}
+
+/* Drop preview ghost and sortable placeholder (on <body>, viewport coordinates). */
+.mxt-drop-ghost {
+    position: fixed;
+    z-index: 2147481500;
+    box-sizing: border-box;
+    border-radius: 6px;
+    pointer-events: none;
+    animation: mxt-ghost-in 120ms ease-out;
+}
+
+.mxt-drop-ghost--valid,
+.mxt-drop-ghost--placeholder {
+    border: 2px dashed var(--mxt-draggable-accent, #2563eb);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.mxt-drop-ghost--placeholder {
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.mxt-drop-ghost--invalid {
+    border: 2px dashed var(--mxt-draggable-danger, #b91c1c);
+    background: rgba(185, 28, 28, 0.08);
+}
+
+@keyframes mxt-ghost-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* A rejected zone the item is over right now (Drop preview). */
+.mxt-drop-zone--invalid {
+    outline: 2px solid var(--mxt-drop-zone-rejected-over, #b91c1c);
+    outline-offset: -2px;
+    background-color: rgba(185, 28, 28, 0.06);
+    opacity: 1;
+}
+
+/* Equal spacing hints with the gap in pixels. */
+.mxt-spacing-hint {
+    position: fixed;
+    background: var(--mxt-snap-guide, #ec4899);
+    animation: mxt-snap-guide-in 120ms ease-out;
+}
+
+.mxt-spacing-hint--x {
+    height: 1px;
+}
+
+.mxt-spacing-hint--y {
+    width: 1px;
+}
+
+.mxt-spacing-hint__label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--mxt-snap-guide-label, #9d174d);
+    color: #fff;
+    font: 600 10px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+/* Rotatable items turn an inner body, so the position (transform) is never rotated. */
+.mxt-draggable__body {
+    position: relative;
+}
+
+.mxt-draggable--sized > .mxt-draggable__body {
+    height: 100%;
+}
+
+.mxt-draggable--animated .mxt-draggable__body {
+    transition: rotate 220ms ease-out;
+}
+
+.mxt-draggable--rotating .mxt-draggable__body,
+.mxt-draggable--motion-off .mxt-draggable__body {
+    transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mxt-draggable--animated .mxt-draggable__body {
+        transition: none;
+    }
+}
+
+/* Rotate handle: a 24 px target (WCAG 2.2 target size) above the top edge. */
+.mxt-draggable__rotate {
+    position: absolute;
+    z-index: 3;
+    top: -32px;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+    border-radius: 50%;
+    cursor: grab;
+    touch-action: none;
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.mxt-draggable__rotate::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: var(--mxt-surface);
+    border: 2px solid var(--mxt-accent);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.mxt-draggable__rotate::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 22px;
+    width: 1px;
+    height: 10px;
+    background: var(--mxt-accent);
+}
+
+.mxt-draggable--sized .mxt-draggable__rotate {
+    top: 2px;
+}
+
+.mxt-draggable--sized .mxt-draggable__rotate::after {
+    display: none;
+}
+
+.mxt-draggable--rotatable:hover .mxt-draggable__rotate,
+.mxt-draggable--rotatable:focus-visible .mxt-draggable__rotate,
+.mxt-draggable--rotatable.mxt-draggable--selected .mxt-draggable__rotate,
+.mxt-draggable--rotating .mxt-draggable__rotate {
+    opacity: 1;
+}
+
+.mxt-draggable--rotating {
+    user-select: none;
+    transition: none;
+}
+
+.mxt-draggable--rotating .mxt-draggable__rotate {
+    cursor: grabbing;
+}
+
+/* Touch long-press: the page keeps scrolling until the press arms the drag. */
+.mxt-draggable--long-press {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.mxt-draggable--armed {
+    animation: mxt-draggable-armed 180ms ease-out;
+}
+
+@keyframes mxt-draggable-armed {
+    50% {
+        scale: 1.03;
+    }
+}
+
+/* Saving: a small spinner after 400 ms, so quick actions never flicker. */
+.mxt-draggable__saving {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    box-sizing: border-box;
+    border: 2px solid rgba(37, 99, 235, 0.25);
+    border-top-color: var(--mxt-accent);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: mxt-draggable-spin 800ms linear infinite, mxt-draggable-show 1ms 400ms forwards;
+}
+
+@keyframes mxt-draggable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes mxt-draggable-show {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Failure notice with Retry / Dismiss (role="alert"). */
+.mxt-draggable__notice {
+    position: absolute;
+    z-index: 4;
+    top: calc(100% + 6px);
+    left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 200px;
+    max-width: min(320px, 90vw);
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border-left: 4px solid var(--mxt-danger);
+    background: var(--mxt-surface);
+    color: var(--mxt-text);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    cursor: default;
+}
+
+[dir="rtl"] .mxt-draggable__notice {
+    left: auto;
+    right: 0;
+    border-left: 0;
+    border-right: 4px solid var(--mxt-danger);
+}
+
+.mxt-draggable__notice-text {
+    flex: 1 1 100%;
+}
+
+.mxt-draggable__notice-button {
+    min-height: 28px;
+    padding: 2px 10px;
+    border: 1px solid #1d4ed8;
+    border-radius: 4px;
+    background: #1d4ed8;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mxt-draggable__notice-button--quiet {
+    background: transparent;
+    color: #1d4ed8;
+}
+
+.mxt-draggable__notice-button:focus-visible {
+    outline: 2px solid var(--mxt-text);
+    outline-offset: 2px;
+}
+
+/* Error boundary fallback. */
+.mxt-draggable-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #b91c1c;
+    border-radius: 6px;
+    background: #fef2f2;
+    color: #7f1d1d;
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.mxt-draggable-error__retry {
+    min-height: 28px;
+    padding: 2px 10px;
+    border: 1px solid #7f1d1d;
+    border-radius: 4px;
+    background: #fff;
+    color: #7f1d1d;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Item menu (portal on <body>). */
+.mxt-menu {
+    position: fixed;
+    z-index: 2147483100;
+    min-width: 200px;
+    max-width: calc(100vw - 8px);
+    max-height: calc(100vh - 8px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 4px;
+    border: 1px solid rgba(17, 24, 39, 0.15);
+    border-radius: 8px;
+    background: var(--mxt-draggable-surface, #ffffff);
+    color: var(--mxt-draggable-text, #111827);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    animation: mxt-menu-in 120ms ease-out;
+}
+
+.mxt-menu__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.mxt-menu__item--separated {
+    margin-top: 5px;
+    box-shadow: 0 -3px 0 -2px rgba(17, 24, 39, 0.12);
+}
+
+.mxt-menu__item:focus,
+.mxt-menu__item:hover:not(:disabled) {
+    outline: none;
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.mxt-menu__item:focus-visible {
+    outline: 2px solid var(--mxt-draggable-text, #111827);
+    outline-offset: -2px;
+}
+
+.mxt-menu__item:disabled {
+    color: #6b7280;
+    cursor: default;
+}
+
+.mxt-menu__hint {
+    color: #4b5563;
+    font-size: 11px;
+}
+
+.mxt-menu__item:focus .mxt-menu__hint,
+.mxt-menu__item:hover:not(:disabled) .mxt-menu__hint {
+    color: #e5e7eb;
+}
+
+@keyframes mxt-menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Dark mode: the menu, notices and handles follow the system theme unless a theme sets the variables. */
+@media (prefers-color-scheme: dark) {
+    .mxt-draggable {
+        --mxt-surface: var(--mxt-draggable-surface, #1f2937);
+        --mxt-text: var(--mxt-draggable-text, #f9fafb);
+        --mxt-accent: var(--mxt-draggable-accent, #60a5fa);
+        --mxt-danger: var(--mxt-draggable-danger, #f87171);
+    }
+
+    .mxt-menu {
+        border-color: rgba(255, 255, 255, 0.15);
+        background: var(--mxt-draggable-surface, #1f2937);
+        color: var(--mxt-draggable-text, #f9fafb);
+    }
+
+    .mxt-menu__item:disabled {
+        color: #9ca3af;
+    }
+
+    .mxt-menu__hint {
+        color: #d1d5db;
+    }
+
+    .mxt-draggable__notice-button--quiet {
+        color: #93c5fd;
+        border-color: #93c5fd;
+    }
+}
+
+@media print {
+    .mxt-draggable__rotate,
+    .mxt-draggable__saving,
+    .mxt-draggable__notice,
+    .mxt-drop-ghost,
+    .mxt-lasso,
+    .mxt-menu {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mxt-draggable--animated.mxt-draggable--displaced,
+    .mxt-draggable__rotate {
+        transition: none;
+    }
+
+    .mxt-drop-ghost,
+    .mxt-spacing-hint,
+    .mxt-menu,
+    .mxt-draggable--armed {
+        animation: none;
+    }
+
+    .mxt-draggable__saving {
+        animation: mxt-draggable-show 1ms 400ms forwards;
+    }
+}

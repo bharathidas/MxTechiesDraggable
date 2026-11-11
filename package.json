@@ -1,8 +1,8 @@
 {
     "name": "mxtechiesdraggable-web",
     "widgetName": "MxTechiesDraggable",
-    "version": "1.0.0",
-    "description": "Makes any Mendix content draggable with the mouse or touch, powered by react-draggable. Supports axis locking, drag handles, bounds, grid snapping, position persistence and drag events.",
+    "version": "2.0.0",
+    "description": "Makes any Mendix content draggable, resizable, rotatable and sortable with the mouse, touch or keyboard. Multi-select and lasso, sortable lists and grids with cross-list moves, smart alignment and equal spacing guides, z-order, drop previews, touch long-press, layout snapshots, drop zones with accept rules, collision avoidance, auto-scroll, undo and persistence.",
     "copyright": "© MX Techies 2026",
     "license": "Apache-2.0",
     "private": true,
@@ -29,7 +29,12 @@
         "dev": "pluggable-widgets-tools start:ts",
         "lint": "pluggable-widgets-tools lint",
         "lint:fix": "pluggable-widgets-tools lint:fix",
-        "release": "pluggable-widgets-tools release:ts"
+        "test": "pluggable-widgets-tools test:unit:web",
+        "release": "pluggable-widgets-tools release:ts",
+        "generate:typings": "node scripts/generate-typings.mjs",
+        "harness": "node harness/build.mjs && node harness/test.mjs && node harness/test-v22.mjs",
+        "licenses": "node scripts/check-licenses.mjs",
+        "sbom": "node scripts/check-licenses.mjs && node scripts/sbom.mjs"
     },
     "dependencies": {
         "classnames": "^2.5.1",
@@ -37,21 +42,26 @@
     },
     "devDependencies": {
         "@mendix/pluggable-widgets-tools": "11.12.1",
-        "@types/big.js": "^6.2.2"
+        "@types/big.js": "^6.2.2",
+        "esbuild": "^0.25.0",
+        "puppeteer-core": "^24.0.0",
+        "typescript": "5.9.3"
     },
     "overrides": {
         "zip-a-folder": "6.1.4",
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "@types/react": "19.0.0",
-        "@types/react-dom": "19.0.0"
+        "@types/react-dom": "19.0.0",
+        "typescript": "5.9.3"
     },
     "resolutions": {
         "zip-a-folder": "6.1.4",
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "@types/react": "19.0.0",
-        "@types/react-dom": "19.0.0"
+        "@types/react-dom": "19.0.0",
+        "typescript": "5.9.3"
     },
     "repository": {
         "type": "git",
@@ -66,6 +76,10 @@
         "pluggable-widget",
         "draggable",
         "react-draggable",
-        "drag-and-drop"
+        "drag-and-drop",
+        "sortable",
+        "multi-select",
+        "lasso",
+        "rotate"
     ]
 }

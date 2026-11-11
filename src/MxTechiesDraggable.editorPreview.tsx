@@ -22,7 +22,7 @@ export function preview(props: MxTechiesDraggablePreviewProps): ReactElement {
                 ...props.styleObject
             }}
         >
-            <Content caption={AXIS_HINT[props.axis]}>
+            <Content caption={props.sortMode && props.sortMode !== "off" ? "Sortable item" : AXIS_HINT[props.axis]}>
                 <div />
             </Content>
         </div>

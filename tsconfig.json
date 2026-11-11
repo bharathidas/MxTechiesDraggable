@@ -3,7 +3,11 @@
     "compilerOptions": {
         "baseUrl": "./",
         "outDir": "./dist/tmp",
-        "rootDir": "./"
+        "rootDir": "./",
+        "importHelpers": false
     },
-    "include": ["./src", "./typings"]
+    "include": [
+        "./src",
+        "./typings"
+    ]
 }

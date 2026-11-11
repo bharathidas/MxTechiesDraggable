@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <widget id="com.mxtechies.widget.web.mxtechiesdraggable.MxTechiesDraggable" pluginWidget="true" offlineCapable="true" supportedPlatform="Web" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>MxTechies Draggable</name>
-    <description>Makes the content placed inside it draggable with mouse or touch. Supports axis locking, a drag handle, bounds, grid snapping, saving the position to attributes and drag events.</description>
+    <description>Makes the content placed inside it draggable, resizable, rotatable or sortable with mouse, touch or keyboard: multi-select and lasso, sortable lists and grids, smart guides, z-order, drop zones with previews, layout snapshots, undo and saving to attributes.</description>
     <studioProCategory>Containers</studioProCategory>
     <studioCategory>Containers</studioCategory>
     <properties>
@@ -35,6 +35,14 @@
                     <caption>Disabled</caption>
                     <description>When true the content cannot be dragged.</description>
                     <returnType type="Boolean" />
+                </property>
+                <property key="touchDelay" type="integer" defaultValue="0">
+                    <caption>Touch long-press (ms)</caption>
+                    <description>On touch screens a drag only starts after the finger rests this long on the item, so swiping over it still scrolls the page. 0 starts dragging immediately (and the page cannot be scrolled from the item), as in earlier versions. 250 to 400 works well on phones.</description>
+                </property>
+                <property key="hapticFeedback" type="boolean" defaultValue="true">
+                    <caption>Vibrate on long-press</caption>
+                    <description>Gives a short vibration when a long-press starts a drag, on devices and browsers that support it.</description>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Bounds">
@@ -80,6 +88,81 @@
                     <description>Vertical step the content snaps to while dragging. 0 disables snapping.</description>
                 </property>
             </propertyGroup>
+            <propertyGroup caption="Resizing">
+                <property key="resizable" type="boolean" defaultValue="false">
+                    <caption>Resizable</caption>
+                    <description>Adds resize handles on the right edge, the bottom edge and the bottom-right corner (and Alt + arrow keys when the widget has focus). The content's position does not change while resizing.</description>
+                </property>
+                <property key="widthAttribute" type="attribute" required="false">
+                    <caption>Width attribute</caption>
+                    <description>Optional Integer, Long or Decimal attribute that stores the width in pixels. Written when a resize ends; changing it moves the size.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="heightAttribute" type="attribute" required="false">
+                    <caption>Height attribute</caption>
+                    <description>Optional Integer, Long or Decimal attribute that stores the height in pixels.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="minWidth" type="integer" defaultValue="40">
+                    <caption>Minimum width (px)</caption>
+                    <description>Smallest width a user can resize to.</description>
+                </property>
+                <property key="minHeight" type="integer" defaultValue="40">
+                    <caption>Minimum height (px)</caption>
+                    <description>Smallest height a user can resize to.</description>
+                </property>
+                <property key="maxWidth" type="integer" defaultValue="0">
+                    <caption>Maximum width (px)</caption>
+                    <description>Largest width a user can resize to; 0 means no maximum (the bounds element still limits it).</description>
+                </property>
+                <property key="maxHeight" type="integer" defaultValue="0">
+                    <caption>Maximum height (px)</caption>
+                    <description>Largest height a user can resize to; 0 means no maximum (the bounds element still limits it).</description>
+                </property>
+                <property key="keepAspectRatio" type="boolean" defaultValue="false">
+                    <caption>Keep aspect ratio</caption>
+                    <description>Resizing keeps the width to height ratio the content had when the resize started.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Rotation and stacking">
+                <property key="rotatable" type="boolean" defaultValue="false">
+                    <caption>Rotatable</caption>
+                    <description>Adds a rotate handle above the item (hold Shift to turn in steps) and the keys [ and ] (Shift + [ or ] turns 1 degree).</description>
+                </property>
+                <property key="rotationAttribute" type="attribute" required="false">
+                    <caption>Rotation attribute</caption>
+                    <description>Optional Integer, Long or Decimal attribute that stores the rotation in degrees (-180 to 180). Written when a rotation ends; changing it turns the item.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="rotationStep" type="integer" defaultValue="15">
+                    <caption>Rotation step (degrees)</caption>
+                    <description>Step used while Shift is held on the rotate handle and for the [ and ] keys.</description>
+                </property>
+                <property key="zOrder" type="boolean" defaultValue="false">
+                    <caption>Z-order</caption>
+                    <description>Lets the user bring the item forward or send it back among the draggables of its group: Ctrl+] forward, Ctrl+[ backward, Ctrl+Shift+] to the front, Ctrl+Shift+[ to the back, or the item menu. A pointer press does not change the order.</description>
+                </property>
+                <property key="zIndexAttribute" type="attribute" required="false">
+                    <caption>Z-index attribute</caption>
+                    <description>Optional Integer or Long attribute that stores the stacking order (1 is the bottom). Written for every item of the group whose layer changes.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Position">
             <propertyGroup caption="Position">
@@ -109,6 +192,11 @@
                     <caption>Default Y (px)</caption>
                     <description>Starting vertical offset, used when no Y attribute is set or the attribute is empty.</description>
                 </property>
+                <property key="persistKey" type="expression" required="false">
+                    <caption>Remember in browser (key)</caption>
+                    <description>Optional key under which the position is saved in the browser's local storage, for pages without X and Y attributes. Use a unique text per widget, e.g. 'dashboard-notes' or 'note-' + toString($currentObject/Id). Bound attributes always win over the saved value.</description>
+                    <returnType type="String" />
+                </property>
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Appearance">
@@ -129,6 +217,587 @@
                     <caption>Lift while dragging</caption>
                     <description>Raises the content with a shadow and slight scale while it is being dragged, and eases it back on drop.</description>
                 </property>
+                <property key="raiseListRows" type="boolean" defaultValue="true">
+                    <caption>Raise list rows</caption>
+                    <description>Inside a list view, template grid or gallery: lifts the item's row above the other rows while it is dragged or rests away from its place, so it is never hidden or clipped. Not used in sortable mode.</description>
+                </property>
+                <property key="animate" type="boolean" defaultValue="true">
+                    <caption>Animate</caption>
+                    <description>Tilts the content slightly in the drag direction, glides between grid steps, plays a ripple on the drop zone and animates returns and throws. Always off for users who ask the system for reduced motion.</description>
+                </property>
+                <property key="motion" type="enumeration" defaultValue="full">
+                    <caption>Motion</caption>
+                    <description>Full: tilt, glides, springs, ripples and zone flashes. Subtle: glides and springs only (no tilt, ripple or flash). Off: no animation. Only applies while Animate is on; always off for users who ask the system for reduced motion.</description>
+                    <enumerationValues>
+                        <enumerationValue key="full">Full</enumerationValue>
+                        <enumerationValue key="subtle">Subtle</enumerationValue>
+                        <enumerationValue key="off">Off</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="momentum" type="boolean" defaultValue="false">
+                    <caption>Momentum</caption>
+                    <description>Lets the user throw the content: after a quick release it keeps gliding and slows down, staying inside the bounds and landing on the grid. Needs Animate.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Interaction">
+            <propertyGroup caption="Drop zones">
+                <property key="dropTargetSelector" type="string" required="false">
+                    <caption>Drop zone selector</caption>
+                    <description>CSS selector of the elements the content can be dropped on, e.g. '.drop-zone'. Zones under the pointer get the class 'mxt-drop-zone--over' while dragging. Leave empty to turn drop zones off.</description>
+                </property>
+                <property key="dropIdClassPrefix" type="string" required="false" defaultValue="zone-">
+                    <caption>Zone id class prefix</caption>
+                    <description>How the zone id is found when the zone has no data-drop-id attribute: a class starting with this prefix gives the id, so class 'drop-zone zone-backlog' gives 'backlog'. After that the id attribute and the 'mx-name-' class are tried.</description>
+                </property>
+                <property key="returnIfNotDropped" type="boolean" defaultValue="false">
+                    <caption>Return if not dropped</caption>
+                    <description>When the content is released outside every drop zone it slides back to where the drag started. Without drop zones it always returns, like a rubber band.</description>
+                </property>
+                <property key="dragType" type="expression" required="false">
+                    <caption>Drag type</caption>
+                    <description>Optional type of this item, for example 'task' or $currentObject/Kind. A zone with accept classes (accept-task accept-bug) or a data-accept attribute (space or comma separated types, '*' for all) only takes items of those types; the other zones are marked 'mxt-drop-zone--rejected' while dragging and ignore the drop. Zones without data-accept take everything.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="dropPreview" type="boolean" defaultValue="false">
+                    <caption>Drop preview</caption>
+                    <description>While dragging, shows a ghost outline where the item will really land (after grid snapping, snap guides, overlap avoidance and Return if not dropped), and marks a zone that does not accept the item with 'mxt-drop-zone--invalid' while the item is over it.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Snap guides">
+                <property key="snapToSiblings" type="boolean" defaultValue="false">
+                    <caption>Snap to siblings</caption>
+                    <description>While dragging, shows alignment guides and snaps to the edges and centres of other draggables in the same container, and to the bounds element when Bounds is 'Parent element' or 'Custom selector'.</description>
+                </property>
+                <property key="snapThreshold" type="integer" defaultValue="8">
+                    <caption>Snap distance (px)</caption>
+                    <description>How close an edge or centre must come to another one before it snaps.</description>
+                </property>
+                <property key="equalSpacing" type="boolean" defaultValue="false">
+                    <caption>Equal spacing hints</caption>
+                    <description>Also snaps to equal gaps: when the item is in a row or column with other draggables it snaps to a gap that already exists there, or to the middle between its two neighbours, and shows the gaps with their size in pixels. Needs Snap to siblings.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Collision and scrolling">
+                <property key="collision" type="enumeration" defaultValue="none">
+                    <caption>Overlap with other draggables</caption>
+                    <description>None: items may overlap. Revert: a drop that would overlap another draggable in the same container returns to where the drag started. Nudge: the item moves to the nearest free spot (grid steps when a grid is set), or returns when there is none.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">Allow overlap</enumerationValue>
+                        <enumerationValue key="revert">Revert</enumerationValue>
+                        <enumerationValue key="nudge">Nudge to the nearest free spot</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="autoScroll" type="boolean" defaultValue="false">
+                    <caption>Auto-scroll</caption>
+                    <description>Scrolls the page (or the nearest scrollable container) while the pointer is held near its edge during a drag, faster closer to the edge.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Keyboard">
+                <property key="keyboardEnabled" type="boolean" defaultValue="true">
+                    <caption>Keyboard dragging</caption>
+                    <description>Makes the widget focusable. Arrow keys move it one grid step (Shift moves ten), Enter or Space picks it up and drops it on the drop zone underneath, Escape cancels.</description>
+                </property>
+                <property key="keyboardStep" type="integer" defaultValue="10">
+                    <caption>Keyboard step (px)</caption>
+                    <description>Distance one arrow key press moves the content when no grid is set.</description>
+                </property>
+                <property key="undoEnabled" type="boolean" defaultValue="false">
+                    <caption>Undo with Ctrl+Z</caption>
+                    <description>While the widget has focus, Ctrl+Z (Cmd+Z) moves it back to its previous position, up to 20 steps.</description>
+                </property>
+                <property key="resetEnabled" type="boolean" defaultValue="false">
+                    <caption>Reset with Home or double-click</caption>
+                    <description>Home (while focused) or a double-click moves the content back to Default X and Default Y.</description>
+                </property>
+                <property key="keyboardInstructions" type="textTemplate" required="false">
+                    <caption>Screen reader instructions</caption>
+                    <description>Read by screen readers when the widget gets keyboard focus.</description>
+                    <translations>
+                        <translation lang="en_US">Draggable. Use the arrow keys to move, hold Shift to move faster. Press Enter or Space to pick up and drop, Escape to cancel.</translation>
+                    </translations>
+                </property>
+                <property key="contextMenu" type="boolean" defaultValue="false">
+                    <caption>Item menu</caption>
+                    <description>Right-click (or Shift+F10 / the Menu key while focused) opens a menu with the actions this item supports: z-order, rotation, moving in a sortable list, selection, undo, reset and layout snapshots. Every drag action then also has a single-click alternative.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Selection">
+                <property key="multiSelect" type="boolean" defaultValue="false">
+                    <caption>Multi-select</caption>
+                    <description>Shift+click or Ctrl+click adds items of the same group to the selection, dragging a selected item moves the whole selection, and the arrow keys move all selected items. Ctrl+Space toggles the focused item, Ctrl+A selects the whole group, Escape clears the selection.</description>
+                </property>
+                <property key="lasso" type="boolean" defaultValue="false">
+                    <caption>Lasso selection</caption>
+                    <description>Dragging with the mouse on the empty background of the lasso area draws a selection rectangle; Shift or Ctrl adds to the selection. A plain click on the background clears it. Needs Multi-select.</description>
+                </property>
+                <property key="lassoSelector" type="string" required="false">
+                    <caption>Lasso area selector</caption>
+                    <description>CSS selector of the container the lasso works in, e.g. '.canvas' (the nearest matching ancestor is used). Empty: the bounds element when Bounds is 'Parent element' or 'Custom selector', otherwise the element that contains the widget.</description>
+                </property>
+                <property key="groupName" type="string" required="false">
+                    <caption>Group</caption>
+                    <description>Draggables with the same group name work together: selection and lasso, group moves, z-order, one shared undo history and layout snapshots. Empty means the group 'default'.</description>
+                </property>
+                <property key="selectedAttribute" type="attribute" required="false">
+                    <caption>Selected attribute</caption>
+                    <description>Optional Boolean attribute set to true while this item is selected.</description>
+                    <attributeTypes>
+                        <attributeType name="Boolean" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Sorting">
+                <property key="sortMode" type="enumeration" defaultValue="off">
+                    <caption>Sortable</caption>
+                    <description>Turns the item into an entry of a sortable list: dragging (or Space, the arrow keys and Space again) moves it to another position while the other items make room. Put the widget inside each item of a list view or gallery. Positions are not stored in X and Y in this mode.</description>
+                    <enumerationValues>
+                        <enumerationValue key="off">Off (free positioning)</enumerationValue>
+                        <enumerationValue key="list">Vertical list</enumerationValue>
+                        <enumerationValue key="horizontal">Horizontal list</enumerationValue>
+                        <enumerationValue key="grid">Wrapping grid</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="sortContainerSelector" type="string" required="false">
+                    <caption>List selector</caption>
+                    <description>CSS selector of the list the items are sorted in, e.g. '.mx-name-tasks' (the nearest matching ancestor). Empty: the nearest list view, template grid or gallery, else the parent element.</description>
+                </property>
+                <property key="sortCrossContainer" type="boolean" defaultValue="false">
+                    <caption>Move between lists</caption>
+                    <description>Items can also be moved to every other list matching the list selector (also empty ones); PageUp and PageDown move a lifted item to the previous or next list. Needs a list selector.</description>
+                </property>
+                <property key="orderAttribute" type="attribute" required="false">
+                    <caption>Order attribute</caption>
+                    <description>Optional Integer, Long or Decimal attribute that receives the item's new position after a reorder. Every item whose position changed is written. Sort the list on this attribute and refresh it (for example in On reorder) to keep the order.</description>
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                        <attributeType name="Decimal" />
+                    </attributeTypes>
+                </property>
+                <property key="orderOffset" type="integer" defaultValue="0">
+                    <caption>First position</caption>
+                    <description>Value written to the order attribute for the first position, e.g. 0 or 1.</description>
+                </property>
+                <property key="sortTimeout" type="integer" defaultValue="6000">
+                    <caption>Confirm within (ms)</caption>
+                    <description>After On reorder the new order stays on screen until the list shows it. If the list has not changed within this time (and the action has finished), the order is rolled back and a message with Retry is shown. 0 keeps the new order on screen without checking.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Layout">
+            <propertyGroup caption="Snapshots">
+                <property key="snapshotsEnabled" type="boolean" defaultValue="false">
+                    <caption>Layout snapshots</caption>
+                    <description>This item takes part in named layout snapshots of its group (position, size, rotation and z-index). Snapshots are saved and restored from the item menu or the Layout command attribute, and restoring can be undone with Ctrl+Z.</description>
+                </property>
+                <property key="itemKey" type="expression" required="false">
+                    <caption>Item key</caption>
+                    <description>Unique key of this item inside its group, e.g. 'notes' or toString($currentObject/Id). Empty: the Remember in browser key, then the widget name.</description>
+                    <returnType type="String" />
+                </property>
+                <property key="snapshotAttribute" type="attribute" required="false">
+                    <caption>Snapshot attribute</caption>
+                    <description>Optional String attribute (unlimited length) that stores the group's snapshots as JSON. Set it on one item of the group, typically bound to a layout object. Without it the snapshots are kept in the browser.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="layoutCommand" type="attribute" required="false">
+                    <caption>Layout command attribute</caption>
+                    <description>Optional String attribute a button can set to 'save Name', 'restore Name', 'delete Name' or 'reset'. The item runs the command for its group and clears the attribute.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="resetSnapshot" type="string" required="false">
+                    <caption>Reset to snapshot</caption>
+                    <description>Name of a snapshot used by Home, double-click and Reset position instead of Default X and Y, when it contains this item.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Texts">
+            <propertyGroup caption="Announcements">
+                <property key="pickUpText" type="textTemplate" required="false">
+                    <caption>Picked up</caption>
+                    <description>Announced when the item is picked up with Enter or Space.</description>
+                    <translations>
+                        <translation lang="en_US">Picked up. Move with the arrow keys, press Enter or Space to put down, Escape to cancel.</translation>
+                    </translations>
+                </property>
+                <property key="pickUpZonesText" type="textTemplate" required="false">
+                    <caption>Picked up (drop zones)</caption>
+                    <description>Announced when the item is picked up while drop zones are configured.</description>
+                    <translations>
+                        <translation lang="en_US">Picked up. Move with the arrow keys, press Enter or Space to drop, Escape to cancel.</translation>
+                    </translations>
+                </property>
+                <property key="movedText" type="textTemplate" required="false">
+                    <caption>Moved</caption>
+                    <description>Announced after a keyboard move; [x] and [y] are the new offsets.</description>
+                    <translations>
+                        <translation lang="en_US">Moved to [x], [y].</translation>
+                    </translations>
+                </property>
+                <property key="overZoneText" type="textTemplate" required="false">
+                    <caption>Over a zone</caption>
+                    <description>Announced when the item is over a drop zone; [zone] is the zone id.</description>
+                    <translations>
+                        <translation lang="en_US">Over [zone]. Press Enter to drop.</translation>
+                    </translations>
+                </property>
+                <property key="droppedOnText" type="textTemplate" required="false">
+                    <caption>Dropped on a zone</caption>
+                    <description>Announced after a drop on a zone; [zone] is the zone id.</description>
+                    <translations>
+                        <translation lang="en_US">Dropped on [zone].</translation>
+                    </translations>
+                </property>
+                <property key="droppedAtText" type="textTemplate" required="false">
+                    <caption>Put down</caption>
+                    <description>Announced after putting the item down outside a zone; [x] and [y] are the offsets.</description>
+                    <translations>
+                        <translation lang="en_US">Dropped at [x], [y].</translation>
+                    </translations>
+                </property>
+                <property key="cancelledText" type="textTemplate" required="false">
+                    <caption>Cancelled</caption>
+                    <description>Announced when a pick-up is cancelled.</description>
+                    <translations>
+                        <translation lang="en_US">Cancelled. Back at the start.</translation>
+                    </translations>
+                </property>
+                <property key="edgeText" type="textTemplate" required="false">
+                    <caption>Edge reached</caption>
+                    <description>Announced when the item cannot move further.</description>
+                    <translations>
+                        <translation lang="en_US">Edge reached.</translation>
+                    </translations>
+                </property>
+                <property key="resizedText" type="textTemplate" required="false">
+                    <caption>Resized</caption>
+                    <description>Announced after a resize; [width] and [height] are the new size.</description>
+                    <translations>
+                        <translation lang="en_US">Resized to [width] by [height].</translation>
+                    </translations>
+                </property>
+                <property key="undoneText" type="textTemplate" required="false">
+                    <caption>Undone</caption>
+                    <description>Announced after Ctrl+Z; [x] and [y] are the restored offsets.</description>
+                    <translations>
+                        <translation lang="en_US">Moved back to [x], [y].</translation>
+                    </translations>
+                </property>
+                <property key="resetText" type="textTemplate" required="false">
+                    <caption>Reset</caption>
+                    <description>Announced after Home or a double-click.</description>
+                    <translations>
+                        <translation lang="en_US">Back at the default position.</translation>
+                    </translations>
+                </property>
+                <property key="nudgedText" type="textTemplate" required="false">
+                    <caption>Nudged</caption>
+                    <description>Announced when a drop would overlap another item and the item was moved to a free spot.</description>
+                    <translations>
+                        <translation lang="en_US">Moved to the nearest free spot.</translation>
+                    </translations>
+                </property>
+                <property key="revertedText" type="textTemplate" required="false">
+                    <caption>Reverted</caption>
+                    <description>Announced when a drop would overlap another item and the item went back.</description>
+                    <translations>
+                        <translation lang="en_US">That spot is taken. Back at the start.</translation>
+                    </translations>
+                </property>
+                <property key="rejectedText" type="textTemplate" required="false">
+                    <caption>Zone does not accept</caption>
+                    <description>Announced when the item is over a zone that does not accept it; [zone] is the zone id.</description>
+                    <translations>
+                        <translation lang="en_US">[zone] does not accept this item.</translation>
+                    </translations>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Selection, sorting and layout">
+                <property key="selectedCountText" type="textTemplate" required="false">
+                    <caption>Selection count</caption>
+                    <description>Announced when the selection changes; [count] is the number of selected items.</description>
+                    <translations>
+                        <translation lang="en_US">[count] selected.</translation>
+                    </translations>
+                </property>
+                <property key="selectionClearedText" type="textTemplate" required="false">
+                    <caption>Selection cleared</caption>
+                    <description>Announced when the selection is cleared.</description>
+                    <translations>
+                        <translation lang="en_US">Selection cleared.</translation>
+                    </translations>
+                </property>
+                <property key="selectedStateText" type="textTemplate" required="false">
+                    <caption>Selected state</caption>
+                    <description>Read with the item's description while it is selected.</description>
+                    <translations>
+                        <translation lang="en_US">Selected.</translation>
+                    </translations>
+                </property>
+                <property key="groupMovedText" type="textTemplate" required="false">
+                    <caption>Group moved</caption>
+                    <description>Announced after the arrow keys moved several selected items; [count] is the number of items.</description>
+                    <translations>
+                        <translation lang="en_US">Moved [count] items.</translation>
+                    </translations>
+                </property>
+                <property key="liftedText" type="textTemplate" required="false">
+                    <caption>Lifted (sortable)</caption>
+                    <description>Announced when a sortable item is lifted; [index] and [count] are its position and the number of positions.</description>
+                    <translations>
+                        <translation lang="en_US">Lifted. Position [index] of [count]. Use the arrow keys to move, Space to drop, Escape to cancel.</translation>
+                    </translations>
+                </property>
+                <property key="sortMovedText" type="textTemplate" required="false">
+                    <caption>Moved (sortable)</caption>
+                    <description>Announced while a lifted item moves; [index] and [count] are the new position and the number of positions.</description>
+                    <translations>
+                        <translation lang="en_US">Position [index] of [count].</translation>
+                    </translations>
+                </property>
+                <property key="sortListText" type="textTemplate" required="false">
+                    <caption>Moved to another list</caption>
+                    <description>Announced when a lifted item moves to another list; [list] is the list id.</description>
+                    <translations>
+                        <translation lang="en_US">Moved to [list], position [index] of [count].</translation>
+                    </translations>
+                </property>
+                <property key="sortDroppedText" type="textTemplate" required="false">
+                    <caption>Dropped (sortable)</caption>
+                    <description>Announced after a sortable item is dropped.</description>
+                    <translations>
+                        <translation lang="en_US">Dropped at position [index] of [count].</translation>
+                    </translations>
+                </property>
+                <property key="sortCancelledText" type="textTemplate" required="false">
+                    <caption>Reorder cancelled</caption>
+                    <description>Announced when a reorder is cancelled; [index] is the original position.</description>
+                    <translations>
+                        <translation lang="en_US">Reorder cancelled. Back at position [index].</translation>
+                    </translations>
+                </property>
+                <property key="sortInstructionsText" type="textTemplate" required="false">
+                    <caption>Sortable instructions</caption>
+                    <description>Read by screen readers when a sortable item gets focus (instead of the general instructions).</description>
+                    <translations>
+                        <translation lang="en_US">Sortable item. Press Space to lift it, the arrow keys to move it, Space to drop it and Escape to cancel.</translation>
+                    </translations>
+                </property>
+                <property key="rotatedText" type="textTemplate" required="false">
+                    <caption>Rotated</caption>
+                    <description>Announced after a rotation; [angle] is the new rotation in degrees.</description>
+                    <translations>
+                        <translation lang="en_US">Rotated to [angle] degrees.</translation>
+                    </translations>
+                </property>
+                <property key="layerText" type="textTemplate" required="false">
+                    <caption>Layer changed</caption>
+                    <description>Announced after a z-order change; [layer] is the new layer (1 is the bottom) and [count] the number of layers.</description>
+                    <translations>
+                        <translation lang="en_US">Layer [layer] of [count].</translation>
+                    </translations>
+                </property>
+                <property key="snapshotSavedText" type="textTemplate" required="false">
+                    <caption>Snapshot saved</caption>
+                    <description>Announced after a layout snapshot is saved; [name] is its name.</description>
+                    <translations>
+                        <translation lang="en_US">Layout [name] saved.</translation>
+                    </translations>
+                </property>
+                <property key="snapshotRestoredText" type="textTemplate" required="false">
+                    <caption>Snapshot restored</caption>
+                    <description>Announced after a layout snapshot is restored; [name] is its name.</description>
+                    <translations>
+                        <translation lang="en_US">Layout [name] restored.</translation>
+                    </translations>
+                </property>
+                <property key="snapshotMissingText" type="textTemplate" required="false">
+                    <caption>Snapshot missing</caption>
+                    <description>Announced when a snapshot to restore does not exist; [name] is its name.</description>
+                    <translations>
+                        <translation lang="en_US">There is no layout called [name].</translation>
+                    </translations>
+                </property>
+                <property key="saveFailedText" type="textTemplate" required="false">
+                    <caption>Save failed</caption>
+                    <description>Shown and announced when a change could not be written (for example a read-only attribute) and was undone.</description>
+                    <translations>
+                        <translation lang="en_US">This change could not be saved, so it was undone.</translation>
+                    </translations>
+                </property>
+                <property key="reorderFailedText" type="textTemplate" required="false">
+                    <caption>Reorder not saved</caption>
+                    <description>Shown and announced when the list did not show the new order in time and the order was rolled back.</description>
+                    <translations>
+                        <translation lang="en_US">The new order was not saved, so it was undone.</translation>
+                    </translations>
+                </property>
+                <property key="retryText" type="textTemplate" required="false">
+                    <caption>Retry button</caption>
+                    <description>Button that tries a failed change again.</description>
+                    <translations>
+                        <translation lang="en_US">Retry</translation>
+                    </translations>
+                </property>
+                <property key="dismissText" type="textTemplate" required="false">
+                    <caption>Dismiss button</caption>
+                    <description>Button that closes a message.</description>
+                    <translations>
+                        <translation lang="en_US">Dismiss</translation>
+                    </translations>
+                </property>
+                <property key="errorText" type="textTemplate" required="false">
+                    <caption>Error message</caption>
+                    <description>Shown instead of the item when it fails to render.</description>
+                    <translations>
+                        <translation lang="en_US">This item could not be shown.</translation>
+                    </translations>
+                </property>
+                <property key="tryAgainText" type="textTemplate" required="false">
+                    <caption>Try again button</caption>
+                    <description>Button that renders a failed item again.</description>
+                    <translations>
+                        <translation lang="en_US">Try again</translation>
+                    </translations>
+                </property>
+                <property key="savingText" type="textTemplate" required="false">
+                    <caption>Saving</caption>
+                    <description>Read by screen readers while an action of the item is running.</description>
+                    <translations>
+                        <translation lang="en_US">Saving</translation>
+                    </translations>
+                </property>
+                <property key="menuLabelText" type="textTemplate" required="false">
+                    <caption>Menu label</caption>
+                    <description>Accessible name of the item menu.</description>
+                    <translations>
+                        <translation lang="en_US">Item actions</translation>
+                    </translations>
+                </property>
+                <property key="menuFrontText" type="textTemplate" required="false">
+                    <caption>Bring to front</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Bring to front</translation>
+                    </translations>
+                </property>
+                <property key="menuForwardText" type="textTemplate" required="false">
+                    <caption>Bring forward</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Bring forward</translation>
+                    </translations>
+                </property>
+                <property key="menuBackwardText" type="textTemplate" required="false">
+                    <caption>Send backward</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Send backward</translation>
+                    </translations>
+                </property>
+                <property key="menuBackText" type="textTemplate" required="false">
+                    <caption>Send to back</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Send to back</translation>
+                    </translations>
+                </property>
+                <property key="menuRotateLeftText" type="textTemplate" required="false">
+                    <caption>Rotate left</caption>
+                    <description>Item menu entry; turns by the rotation step.</description>
+                    <translations>
+                        <translation lang="en_US">Rotate left</translation>
+                    </translations>
+                </property>
+                <property key="menuRotateRightText" type="textTemplate" required="false">
+                    <caption>Rotate right</caption>
+                    <description>Item menu entry; turns by the rotation step.</description>
+                    <translations>
+                        <translation lang="en_US">Rotate right</translation>
+                    </translations>
+                </property>
+                <property key="menuResetRotationText" type="textTemplate" required="false">
+                    <caption>Reset rotation</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Reset rotation</translation>
+                    </translations>
+                </property>
+                <property key="menuMoveUpText" type="textTemplate" required="false">
+                    <caption>Move up</caption>
+                    <description>Item menu entry for sortable items (one position earlier).</description>
+                    <translations>
+                        <translation lang="en_US">Move up</translation>
+                    </translations>
+                </property>
+                <property key="menuMoveDownText" type="textTemplate" required="false">
+                    <caption>Move down</caption>
+                    <description>Item menu entry for sortable items (one position later).</description>
+                    <translations>
+                        <translation lang="en_US">Move down</translation>
+                    </translations>
+                </property>
+                <property key="menuMoveFirstText" type="textTemplate" required="false">
+                    <caption>Move to start</caption>
+                    <description>Item menu entry for sortable items.</description>
+                    <translations>
+                        <translation lang="en_US">Move to start</translation>
+                    </translations>
+                </property>
+                <property key="menuMoveLastText" type="textTemplate" required="false">
+                    <caption>Move to end</caption>
+                    <description>Item menu entry for sortable items.</description>
+                    <translations>
+                        <translation lang="en_US">Move to end</translation>
+                    </translations>
+                </property>
+                <property key="menuSaveSnapshotText" type="textTemplate" required="false">
+                    <caption>Save snapshot</caption>
+                    <description>Item menu entry that saves the group's layout under a new name.</description>
+                    <translations>
+                        <translation lang="en_US">Save layout snapshot</translation>
+                    </translations>
+                </property>
+                <property key="menuRestoreSnapshotText" type="textTemplate" required="false">
+                    <caption>Restore snapshot</caption>
+                    <description>Item menu entry per saved snapshot; [name] is its name.</description>
+                    <translations>
+                        <translation lang="en_US">Restore [name]</translation>
+                    </translations>
+                </property>
+                <property key="menuSelectAllText" type="textTemplate" required="false">
+                    <caption>Select all</caption>
+                    <description>Item menu entry (multi-select).</description>
+                    <translations>
+                        <translation lang="en_US">Select all</translation>
+                    </translations>
+                </property>
+                <property key="menuClearSelectionText" type="textTemplate" required="false">
+                    <caption>Clear selection</caption>
+                    <description>Item menu entry (multi-select).</description>
+                    <translations>
+                        <translation lang="en_US">Clear selection</translation>
+                    </translations>
+                </property>
+                <property key="menuUndoText" type="textTemplate" required="false">
+                    <caption>Undo</caption>
+                    <description>Item menu entry.</description>
+                    <translations>
+                        <translation lang="en_US">Undo</translation>
+                    </translations>
+                </property>
+                <property key="menuResetText" type="textTemplate" required="false">
+                    <caption>Reset position</caption>
+                    <description>Item menu entry (reset to the default position or the reset snapshot).</description>
+                    <translations>
+                        <translation lang="en_US">Reset position</translation>
+                    </translations>
+                </property>
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Events">
@@ -140,6 +809,71 @@
                 <property key="onDragStop" type="action" required="false">
                     <caption>On drag stop</caption>
                     <description>Runs after the user releases the content. The X and Y attributes are already updated when this runs.</description>
+                </property>
+                <property key="onDrop" type="action" required="false">
+                    <caption>On drop</caption>
+                    <description>Runs when the content is dropped on a drop zone, after On drag stop. Variables: targetId (the zone id), x and y (the content's top-left corner relative to the zone, in pixels).</description>
+                    <actionVariables>
+                        <actionVariable key="targetId" type="String" caption="Target id" />
+                        <actionVariable key="x" type="Integer" caption="X in zone" />
+                        <actionVariable key="y" type="Integer" caption="Y in zone" />
+                    </actionVariables>
+                </property>
+                <property key="onPositionChange" type="action" required="false">
+                    <caption>On position change</caption>
+                    <description>Runs after every committed move (drag, keyboard, nudge, undo, reset) with the final translate as variables x and y, for pages where the position cannot be stored in attributes (for example inside a list).</description>
+                    <actionVariables>
+                        <actionVariable key="x" type="Integer" caption="X" />
+                        <actionVariable key="y" type="Integer" caption="Y" />
+                    </actionVariables>
+                </property>
+                <property key="onResize" type="action" required="false">
+                    <caption>On resize</caption>
+                    <description>Runs when a resize ends, with the new size as variables width and height. The width and height attributes are already updated.</description>
+                    <actionVariables>
+                        <actionVariable key="width" type="Integer" caption="Width" />
+                        <actionVariable key="height" type="Integer" caption="Height" />
+                    </actionVariables>
+                </property>
+                <property key="onSelectionChange" type="action" required="false">
+                    <caption>On selection change</caption>
+                    <description>Runs on every item whose selected state changed (multi-select), after the Selected attribute is written. Variable: count, the number of selected items in the group.</description>
+                    <actionVariables>
+                        <actionVariable key="count" type="Integer" caption="Selected count" />
+                    </actionVariables>
+                </property>
+                <property key="onReorder" type="action" required="false">
+                    <caption>On reorder</caption>
+                    <description>Runs on the moved item after a sortable drop, after the order attributes are written. Variables: oldIndex and newIndex (0-based), containerId (the list it was dropped in) and fromContainerId (the list it came from). Commit and refresh the list here; the new order is rolled back if the list does not show it within 'Confirm within'.</description>
+                    <actionVariables>
+                        <actionVariable key="oldIndex" type="Integer" caption="Old index" />
+                        <actionVariable key="newIndex" type="Integer" caption="New index" />
+                        <actionVariable key="containerId" type="String" caption="List id" />
+                        <actionVariable key="fromContainerId" type="String" caption="From list id" />
+                    </actionVariables>
+                </property>
+                <property key="onRotate" type="action" required="false">
+                    <caption>On rotate</caption>
+                    <description>Runs when a rotation ends, after the rotation attribute is written. Variable: angle in degrees.</description>
+                    <actionVariables>
+                        <actionVariable key="angle" type="Decimal" caption="Angle" />
+                    </actionVariables>
+                </property>
+                <property key="onZOrderChange" type="action" required="false">
+                    <caption>On z-order change</caption>
+                    <description>Runs on every item whose layer changed, after its z-index attribute is written. Variable: z, the new layer (1 is the bottom).</description>
+                    <actionVariables>
+                        <actionVariable key="z" type="Integer" caption="Layer" />
+                    </actionVariables>
+                </property>
+                <property key="onSnapshot" type="action" required="false">
+                    <caption>On snapshot</caption>
+                    <description>Runs on the item that saved, restored or deleted a layout snapshot. Variables: operation ('save', 'restore', 'delete' or 'reset'), name, and json (all snapshots of the group, the same text as the snapshot attribute) so a microflow can store it elsewhere.</description>
+                    <actionVariables>
+                        <actionVariable key="operation" type="String" caption="Operation" />
+                        <actionVariable key="name" type="String" caption="Name" />
+                        <actionVariable key="json" type="String" caption="Snapshots JSON" />
+                    </actionVariables>
                 </property>
             </propertyGroup>
         </propertyGroup>
